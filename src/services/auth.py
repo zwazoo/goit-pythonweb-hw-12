@@ -1,3 +1,5 @@
+import redis
+import pickle
 from datetime import datetime, timezone, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -10,6 +12,8 @@ from src.repository.users import get_user_by_email
 from src.config import settings
 
 _password_hash = PasswordHash.recommended()
+
+r = redis.Redis(host='redis', port=6379, db=0)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -62,9 +66,16 @@ async def get_current_user(
     except jwt.PyJWTError:
         raise credentials_exception
 
-    user = await get_user_by_email(email, db)
+    user = r.get(f"user:{email}")
     if user is None:
-        raise credentials_exception
+        user = await get_user_by_email(email, db)
+        if user is None:
+            raise credentials_exception
+        r.set(f"user:{email}", pickle.dumps(user))
+        r.expire(f"user:{email}", 900)
+    else:
+        user = pickle.loads(user)
+
     return user
 
 
