@@ -2,6 +2,17 @@ from datetime import date, timedelta
 
 
 def get_upcoming_birthdays(contacts: list) -> list:
+    """Return contacts whose birthdays fall within the next 7 days.
+
+    If a birthday lands on a weekend, the congratulation date is shifted
+    to the following Monday.
+
+    Args:
+        contacts: List of Contact instances with a ``birthdate`` attribute.
+
+    Returns:
+        List of dicts with keys ``id``, ``name``, and ``congratulation_date``.
+    """
     today = date.today()
     end_range = today + timedelta(days=7)
     upcoming = []

@@ -21,6 +21,13 @@ conf = ConnectionConfig(
 
 
 async def send_email(email: str, username: str, host: str):
+    """Send an email verification message with a confirmation link.
+
+    Args:
+        email: Recipient's email address.
+        username: Recipient's username, used in the email body.
+        host: Base URL of the application, used to build the confirmation link.
+    """
     try:
         token_verification = create_email_token({"sub": email})
         message = MessageSchema(
@@ -40,6 +47,13 @@ async def send_email(email: str, username: str, host: str):
 
 
 async def send_reset_password_email(email: str, username: str, host: str):
+    """Send a password reset email with a one-time reset link.
+
+    Args:
+        email: Recipient's email address.
+        username: Recipient's username, used in the email body.
+        host: Base URL of the application, used to build the reset link.
+    """
     try:
         token = create_password_reset_token(email)
         message = MessageSchema(
