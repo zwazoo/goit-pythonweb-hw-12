@@ -1,4 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request, Form
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+    BackgroundTasks,
+    Request,
+    Form,
+)
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
@@ -28,7 +36,9 @@ from src.services.email import send_email, send_reset_password_email
 from src.config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-templates = Jinja2Templates(directory=Path(__file__).parent.parent / "services" / "templates")
+templates = Jinja2Templates(
+    directory=Path(__file__).parent.parent / "services" / "templates"
+)
 
 
 @router.post("/signup", response_model=UserModel, status_code=status.HTTP_201_CREATED)
@@ -176,6 +186,8 @@ async def reset_password(
     email = get_email_from_reset_token(token)
     user = await repository_users.get_user_by_email(email, db)
     if user is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="User not found"
+        )
     await repository_users.update_password(email, get_password_hash(password), db)
     return {"message": "Password updated successfully"}

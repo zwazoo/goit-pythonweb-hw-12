@@ -114,6 +114,9 @@ Services:
 | `POST` | `/auth/refresh` | Refresh access token |
 | `GET` | `/auth/confirmed_email/{token}` | Confirm email address |
 | `POST` | `/auth/request_email` | Resend confirmation email |
+| `POST` | `/auth/forgot_password` | Send password reset email |
+| `GET` | `/auth/reset_password/{token}` | Password reset form |
+| `POST` | `/auth/reset_password/{token}` | Set new password |
 
 ### Users *(requires auth)*
 
@@ -150,6 +153,21 @@ docker-compose exec app alembic upgrade head
 
 # Rollback one step
 docker-compose exec app alembic downgrade -1
+```
+
+## Testing
+
+Create the test database first:
+
+```bash
+docker-compose exec postgres psql -U <DB_USER> -d postgres -c "CREATE DATABASE <DB_NAME>_test;"
+```
+
+Run tests:
+
+```bash
+pytest
+pytest --cov=src --cov-report=term-missing
 ```
 
 ## Error responses

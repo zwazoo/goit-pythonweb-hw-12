@@ -12,7 +12,6 @@ class RoleAccess:
     async def __call__(
         self, request: Request, current_user: User = Depends(get_current_user)
     ):
-        print(f"Current user role: {current_user.roles}", self.allowed_roles)
         if current_user.role not in self.allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
