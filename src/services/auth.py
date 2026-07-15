@@ -13,7 +13,7 @@ from src.config import settings
 
 _password_hash = PasswordHash.recommended()
 
-r = redis.Redis(host='redis', port=6379, db=0)
+r = redis.Redis(host="redis", port=6379, db=0)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

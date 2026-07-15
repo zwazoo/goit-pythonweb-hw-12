@@ -5,8 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from src.repository import contacts
 from src.services.auth import get_current_user
 from src.services import contacts as contacts_service
-from src.database import get_db
-from src.database.models import User
+from src.database import get_db, User
 from src.schemas.contacts import ContactModel, ContactResponse, BirthdayResponse
 
 router = APIRouter(

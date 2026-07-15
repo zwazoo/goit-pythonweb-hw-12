@@ -1,6 +1,8 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr
 
+from src.database.models import Role
+
 
 class UserLoginRequest(BaseModel):
     email: EmailStr
@@ -17,6 +19,7 @@ class UserModel(BaseModel):
     username: str
     email: EmailStr
     avatar: Optional[str] = None
+    role: Role
 
     class Config:
         from_attributes = True
