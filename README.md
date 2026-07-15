@@ -170,6 +170,17 @@ pytest
 pytest --cov=src --cov-report=term-missing
 ```
 
+## Documentation
+
+Generated with Sphinx from Google-style docstrings.
+
+```bash
+cd docs
+make html
+```
+
+Output: `docs/build/html/index.html`
+
 ## Error responses
 
 | Status | Reason |
