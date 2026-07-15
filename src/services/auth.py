@@ -79,6 +79,28 @@ async def get_current_user(
     return user
 
 
+def create_password_reset_token(email: str):
+    data = {"sub": email}
+    expire = datetime.now(timezone.utc) + timedelta(hours=1)
+    data.update({"iat": datetime.now(timezone.utc), "exp": expire, "token_type": "reset_password"})
+    return jwt.encode(data, settings.hash_secret, algorithm=settings.hash_algorithm)
+
+
+def get_email_from_reset_token(token: str):
+    try:
+        payload = jwt.decode(token, settings.hash_secret, algorithms=[settings.hash_algorithm])
+        if payload.get("token_type") != "reset_password":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type"
+            )
+        return payload["sub"]
+    except jwt.PyJWTError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid password reset token",
+        )
+
+
 def create_email_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(hours=1)

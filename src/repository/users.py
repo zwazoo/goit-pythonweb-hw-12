@@ -39,6 +39,17 @@ async def change_confirmed_email(email: str, db: AsyncSession):
             raise
 
 
+async def update_password(email: str, hashed_password: str, db: AsyncSession):
+    user = await get_user_by_email(email, db)
+    if user:
+        user.hashed_password = hashed_password
+        try:
+            await db.commit()
+        except Exception:
+            await db.rollback()
+            raise
+
+
 async def update_avatar(avatar_url: str, user_id: int, db: AsyncSession):
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()

@@ -33,6 +33,10 @@ class RequestEmail(BaseModel):
     email: EmailStr
 
 
+class PasswordReset(BaseModel):
+    password: str
+
+
 class Token(BaseModel):
     access_token: str
     refresh_token: str

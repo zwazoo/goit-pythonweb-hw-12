@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from pathlib import Path
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 import jwt
@@ -19,11 +22,13 @@ from src.services.auth import (
     create_access_token,
     create_refresh_token,
     get_email_from_token,
+    get_email_from_reset_token,
 )
-from src.services.email import send_email
+from src.services.email import send_email, send_reset_password_email
 from src.config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+templates = Jinja2Templates(directory=Path(__file__).parent.parent / "services" / "templates")
 
 
 @router.post("/signup", response_model=UserModel, status_code=status.HTTP_201_CREATED)
@@ -137,3 +142,40 @@ async def request_email(
             send_email, user.email, user.username, str(request.base_url)
         )
     return {"message": "Check your email for confirmation."}
+
+
+@router.post("/forgot_password")
+async def forgot_password(
+    body: RequestEmail,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    user = await repository_users.get_user_by_email(body.email, db)
+    if user and user.confirmed:
+        background_tasks.add_task(
+            send_reset_password_email, user.email, user.username, str(request.base_url)
+        )
+    return {"message": "You will receive a password reset link."}
+
+
+@router.get("/reset_password/{token}", response_class=HTMLResponse)
+async def reset_password_form(token: str, request: Request):
+    get_email_from_reset_token(token)
+    return templates.TemplateResponse(
+        request=request, name="reset_password_form.html", context={"token": token}
+    )
+
+
+@router.post("/reset_password/{token}")
+async def reset_password(
+    token: str,
+    password: str = Form(),
+    db: AsyncSession = Depends(get_db),
+):
+    email = get_email_from_reset_token(token)
+    user = await repository_users.get_user_by_email(email, db)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
+    await repository_users.update_password(email, get_password_hash(password), db)
+    return {"message": "Password updated successfully"}
